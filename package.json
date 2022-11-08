@@ -1,0 +1,26 @@
+{
+  "name": "image-optimizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "optimize": "node index.js",
+    "initParams": "node src/initParams.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikkistorme/image-optimizer.git"
+  },
+  "author": "Nikki Bright <nikkistorme@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nikkistorme/image-optimizer/issues"
+  },
+  "homepage": "https://github.com/nikkistorme/image-optimizer#readme",
+  "devDependencies": {
+    "fs": "^0.0.1-security",
+    "sharp": "^0.31.2"
+  }
+}

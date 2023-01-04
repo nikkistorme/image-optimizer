@@ -4,13 +4,22 @@ import { appendFile, readdir, mkdir } from "fs/promises";
 import { basename, extname } from "path";
 import params from "./params.js";
 
+let totalImages = 0;
+
+const logStatus = () => {
+  totalImages++;
+  process.stdout.clearLine();
+  process.stdout.cursorTo(0);
+  process.stdout.write(`🤖 ~ ${totalImages} images processed`);
+};
+
 const convert = async (inputImg, outputDir) => {
   const newFileName = `${outputDir}/${basename(inputImg, extname(inputImg))}`;
   try {
     await sharp(inputImg)
       .webp({ quality: params.compress.quality })
       .toFile(`${newFileName}.webp`);
-    console.log("🎉 ~ success for", newFileName);
+    // console.log("🎉 ~ success for", newFileName);
   } catch (error) {
     console.log("🚫 ~ error for", inputImg);
     throw error;
@@ -28,7 +37,6 @@ const convertAndResize = async (inputImg, outputDir, size) => {
       .webp({ quality: params.compress.quality })
       .resize({ width: size })
       .toFile(`${newFileName}-${size}.webp`);
-    console.log("🎉 ~ success for", newFileName);
   } catch (error) {
     console.log("🚫 ~ error for", inputImg);
     throw error;
@@ -48,6 +56,7 @@ const optimizeImage = async (inputImg, outputDir) => {
       `${inputImg}\n`,
       "utf8"
     );
+    throw error;
   }
 };
 
@@ -60,23 +69,29 @@ const direntIsImage = (dirent) => {
 const parseDir = async (inputDir, outputDir) => {
   // Read input directory
   const inputDirEntries = await readdir(inputDir, { withFileTypes: true });
-  inputDirEntries.forEach(async (dirent) => {
+  for (const dirent of inputDirEntries) {
     // path to this file or directory
     const newInput = `${inputDir}/${dirent.name}`;
-    if (dirent.isDirectory()) {
-      // if this is a directory, create a new directory in the output directory
-      // and call parseDir recursively
-      const newOutput = `${outputDir}/${dirent.name}`;
-      if (!existsSync(newOutput)) await mkdir(newOutput);
-      await parseDir(newInput, newOutput);
-    } else if (direntIsImage(dirent)) {
-      // if this is an image file, optimize it
-      await optimizeImage(newInput, outputDir);
+    try {
+      if (dirent.isDirectory()) {
+        // if this is a directory, create a new directory in the output directory
+        // and call parseDir recursively
+        const newOutput = `${outputDir}/${dirent.name}`;
+        if (!existsSync(newOutput)) await mkdir(newOutput);
+        await parseDir(newInput, newOutput);
+      } else if (direntIsImage(dirent)) {
+        // if this is an image file, optimize it
+        await optimizeImage(newInput, outputDir);
+        logStatus();
+      }
+    } catch (error) {
+      continue;
     }
-  });
+  }
 };
 
 const main = async () => {
+  console.log("🤖 ~ Initializing...");
   if (!existsSync(params.input.dir)) await mkdir(params.input.dir);
   if (!existsSync(params.output.dir)) await mkdir(params.output.dir);
 

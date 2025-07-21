@@ -90,12 +90,10 @@ const parseDir = async (inputDir, outputDir) => {
   }
 };
 
-const main = async () => {
+(async () => {
   console.log("🤖 ~ Initializing...");
   if (!existsSync(params.input.dir)) await mkdir(params.input.dir);
   if (!existsSync(params.output.dir)) await mkdir(params.output.dir);
 
   await parseDir(params.input.dir, params.output.dir);
-};
-
-await main();
+})();
